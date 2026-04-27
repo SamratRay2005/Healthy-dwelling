@@ -1,0 +1,74 @@
+<aside class="sidebar">
+
+  <!-- Search -->
+  <div class="sidebar-widget">
+    <h4 class="widget-title">Search</h4>
+    <form action="{{ url_for('blog.search') }}" method="GET" class="sidebar-search-form">
+      <input type="text" name="q" placeholder="Search..."
+             value="{{ request.args.get('q', '') }}" class="sidebar-search-input" />
+      <button type="submit" class="sidebar-search-btn" aria-label="Search">
+        <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5">
+          <circle cx="8" cy="8" r="6"/><path d="M14 14l4 4"/>
+        </svg>
+      </button>
+    </form>
+  </div>
+
+  <!-- Categories -->
+  <div class="sidebar-widget">
+    <h4 class="widget-title">Categories</h4>
+    <ul class="widget-list">
+      {% for cat in sidebar_categories %}
+      <li>
+        <a href="{{ url_for('blog.category', slug=cat.slug) }}" class="widget-link">
+          {{ cat.name }}
+          <span class="widget-count">{{ cat.article_count }}</span>
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <!-- Trending -->
+  {% if sidebar_trending %}
+  <div class="sidebar-widget">
+    <h4 class="widget-title">Trending Reads</h4>
+    <div class="trending-list">
+      {% for post in sidebar_trending %}
+      <a href="{{ url_for('blog.article', slug=post.slug) }}" class="trending-item">
+        <div class="trending-thumb" style="background-image: url('{{ post.cover_image_url }}')"></div>
+        <div class="trending-info">
+          <span class="trending-title">{{ post.title[:55] }}{% if post.title|length > 55 %}…{% endif %}</span>
+          {% if post.category_name %}
+          <span class="trending-cat">{{ post.category_name }}</span>
+          {% endif %}
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+   <!-- Subscribe -->
+  <!-- <div class="sidebar-widget sidebar-subscribe">
+    <h4 class="subscribe-title">Subscribe</h4>
+    <p class="subscribe-sub">to inner insight</p>
+    <form class="subscribe-form" onsubmit="handleSubscribe(event)">
+      <input type="email" placeholder="Email" class="subscribe-input" required />
+      <button type="submit" class="subscribe-btn">Subscribe</button>
+    </form>
+  </div>  -->
+
+  <!-- Tags -->
+  {% if sidebar_tags %}
+  <div class="sidebar-widget">
+    <h4 class="widget-title">Tags</h4>
+    <div class="tags-cloud">
+      {% for tag in sidebar_tags[:15] %}
+      <span class="tag-pill">{{ tag.name }}</span>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+</aside>

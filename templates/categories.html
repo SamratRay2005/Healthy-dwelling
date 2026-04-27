@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Categories — Healthy dwelling{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <span class="page-eyebrow">Browse</span>
+    <h1 class="page-title">Categories</h1>
+    <p class="page-description">Navigate the terrain of the mind by topic.</p>
+  </div>
+</div>
+
+<div class="layout-wrapper">
+  <div class="content-area">
+    <div class="categories-grid">
+      {% for cat in categories %}
+      <a href="{{ url_for('blog.category', slug=cat.slug) }}" class="category-card">
+        <div class="cat-card-inner">
+          <h3 class="cat-name">{{ cat.name }}</h3>
+          {% if cat.description %}
+          <p class="cat-desc">{{ cat.description[:120] }}{% if cat.description|length > 120 %}…{% endif %}</p>
+          {% endif %}
+          <span class="cat-count">{{ cat.article_count }} article{% if cat.article_count != 1 %}s{% endif %}</span>
+          <span class="cat-arrow">→</span>
+        </div>
+      </a>
+      {% else %}
+      <p class="empty-state">No categories yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  {% include "_sidebar.html" %}
+</div>
+{% endblock %}

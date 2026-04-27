@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Healthy dwelling — Psychology, Neuroscience & Consciousness{% endblock %}
+
+{% block content %}
+
+<!-- ══ HERO / FEATURED CAROUSEL ═══════════════════════════════════════════ -->
+{% if featured %}
+<section class="hero-section">
+  <div class="hero-carousel" id="hero-carousel">
+    {% for post in featured %}
+    <div class="hero-slide {% if loop.first %}active{% endif %}"
+         style="background-image: url('{{ post.cover_image_url }}')">
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <span class="hero-label">Unraveling the latest:</span>
+        <h1 class="hero-title">{{ post.title }}</h1>
+        <p class="hero-excerpt">{{ post.excerpt[:180] }}...</p>
+        <a href="{{ url_for('blog.article', slug=post.slug) }}" class="btn-primary">Read More</a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  <div class="carousel-dots" id="carousel-dots">
+    {% for post in featured %}
+    <button class="carousel-dot {% if loop.first %}active{% endif %}" data-index="{{ loop.index0 }}" aria-label="Slide {{ loop.index }}"></button>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- ══ CONTENT + SIDEBAR ═══════════════════════════════════════════════════ -->
+<div class="layout-wrapper">
+  <div class="content-area">
+
+    <!-- Recent Articles Grid -->
+    <div class="section-heading">
+      <h2>Recent Explorations</h2>
+      <a href="{{ url_for('blog.blog') }}" class="see-all">See all →</a>
+    </div>
+
+    <div class="articles-grid">
+      {% for post in recent %}
+      {% include "_article_card.html" %}
+      {% else %}
+      <p class="empty-state">No articles published yet. Check back soon.</p>
+      {% endfor %}
+    </div>
+
+  </div>
+
+  <!-- Sidebar -->
+  {% include "_sidebar.html" %}
+</div>
+
+{% endblock %}

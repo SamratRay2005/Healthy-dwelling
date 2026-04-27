@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% if current_category %}
+  {% set page_title = current_category.name + " — Healthy dwelling" %}
+{% else %}
+  {% set page_title = "The Blog — Healthy dwelling" %}
+{% endif %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+  <div class="page-hero-inner">
+    {% if current_category %}
+    <span class="page-eyebrow">Category</span>
+    <h1 class="page-title">{{ current_category.name }}</h1>
+    {% if current_category.description %}
+    <p class="page-description">{{ current_category.description }}</p>
+    {% endif %}
+    <p class="article-count-badge">{{ pagination.total }} article{% if pagination.total != 1 %}s{% endif %}</p>
+    {% else %}
+    <span class="page-eyebrow">The Blog</span>
+    <h1 class="page-title">All Explorations</h1>
+    <p class="page-description">Dispatches from the interior — psychology, neuroscience, and the art of being human.</p>
+    {% endif %}
+  </div>
+</div>
+
+<div class="layout-wrapper">
+  <div class="content-area">
+
+    {% if pagination["items"] %}
+    <div class="articles-grid">
+      {% for post in pagination["items"] %}
+      {% include "_article_card.html" %}
+      {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if pagination.pages > 1 %}
+    <nav class="pagination" aria-label="Pagination">
+      {% if pagination.page > 1 %}
+      {% if current_category %}
+      <a href="{{ url_for('blog.category', slug=current_category.slug, page=pagination.page - 1) }}" class="page-btn">← Prev</a>
+      {% else %}
+      <a href="?page={{ pagination.page - 1 }}" class="page-btn">← Prev</a>
+      {% endif %}
+      {% endif %}
+
+      {% for p in range(1, pagination.pages + 1) %}
+        {% if p == pagination.page %}
+        <span class="page-btn active">{{ p }}</span>
+        {% elif p == 1 or p == pagination.pages or (p >= pagination.page - 2 and p <= pagination.page + 2) %}
+        {% if current_category %}
+        <a href="{{ url_for('blog.category', slug=current_category.slug, page=p) }}" class="page-btn">{{ p }}</a>
+        {% else %}
+        <a href="?page={{ p }}" class="page-btn">{{ p }}</a>
+        {% endif %}
+        {% elif p == pagination.page - 3 or p == pagination.page + 3 %}
+        <span class="page-ellipsis">…</span>
+        {% endif %}
+      {% endfor %}
+
+      {% if pagination.page < pagination.pages %}
+      {% if current_category %}
+      <a href="{{ url_for('blog.category', slug=current_category.slug, page=pagination.page + 1) }}" class="page-btn">Next →</a>
+      {% else %}
+      <a href="?page={{ pagination.page + 1 }}" class="page-btn">Next →</a>
+      {% endif %}
+      {% endif %}
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <div class="empty-state-box">
+      <p>No articles found in this section yet.</p>
+      <a href="{{ url_for('blog.index') }}" class="btn-primary">Back to Home</a>
+    </div>
+    {% endif %}
+
+  </div>
+
+  {% include "_sidebar.html" %}
+</div>
+{% endblock %}

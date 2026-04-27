@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}{% if query %}Search: {{ query }}{% else %}Search{% endif %} — Healthy dwelling{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <span class="page-eyebrow">Search</span>
+    <h1 class="page-title">{% if query %}Results for "{{ query }}"{% else %}Search the Archive{% endif %}</h1>
+    {% if query and pagination.total %}
+    <p class="page-description">{{ pagination.total }} article{% if pagination.total != 1 %}s{% endif %} found.</p>
+    {% endif %}
+  </div>
+</div>
+
+<div class="layout-wrapper">
+  <div class="content-area">
+
+    <!-- Prominent search form -->
+    <form action="{{ url_for('blog.search') }}" method="GET" class="search-main-form">
+      <input type="text" name="q" value="{{ query }}" placeholder="Search psychology, neuroscience, mindfulness…" class="search-main-input" autofocus />
+      <button type="submit" class="btn-primary">Search</button>
+    </form>
+
+    {% if query %}
+      {% if pagination["items"] %}
+      <div class="articles-grid">
+        {% for post in pagination["items"] %}
+        {% include "_article_card.html" %}
+        {% endfor %}
+      </div>
+
+      {% if pagination.pages > 1 %}
+      <nav class="pagination" aria-label="Pagination">
+        {% if pagination.page > 1 %}
+        <a href="?q={{ query }}&page={{ pagination.page - 1 }}" class="page-btn">← Prev</a>
+        {% endif %}
+        {% for p in range(1, pagination.pages + 1) %}
+          {% if p == pagination.page %}
+          <span class="page-btn active">{{ p }}</span>
+          {% elif p == 1 or p == pagination.pages or (p >= pagination.page - 2 and p <= pagination.page + 2) %}
+          <a href="?q={{ query }}&page={{ p }}" class="page-btn">{{ p }}</a>
+          {% endif %}
+        {% endfor %}
+        {% if pagination.page < pagination.pages %}
+        <a href="?q={{ query }}&page={{ pagination.page + 1 }}" class="page-btn">Next →</a>
+        {% endif %}
+      </nav>
+      {% endif %}
+
+      {% else %}
+      <div class="empty-state-box">
+        <p>No articles matched "<strong>{{ query }}</strong>". Try a different term.</p>
+        <a href="{{ url_for('blog.blog') }}" class="btn-ghost">Browse All Articles</a>
+      </div>
+      {% endif %}
+    {% endif %}
+
+  </div>
+
+  {% include "_sidebar.html" %}
+</div>
+{% endblock %}

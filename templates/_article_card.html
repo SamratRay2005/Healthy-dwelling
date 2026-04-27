@@ -1,0 +1,24 @@
+<article class="article-card">
+  <a href="{{ url_for('blog.article', slug=post.slug) }}" class="card-image-link">
+    <div class="card-image" style="background-image: url('{{ post.cover_image_url or 'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=600&q=70' }}')">
+      {% if post.is_featured %}
+      <span class="card-badge">Featured</span>
+      {% endif %}
+    </div>
+  </a>
+  <div class="card-body">
+    {% if post.category_name %}
+    <a href="{{ url_for('blog.category', slug=post.category_slug) }}" class="card-category">{{ post.category_name }}</a>
+    {% endif %}
+    <h3 class="card-title">
+      <a href="{{ url_for('blog.article', slug=post.slug) }}">{{ post.title }}</a>
+    </h3>
+    <p class="card-excerpt">{{ post.excerpt[:140] if post.excerpt else '' }}{% if post.excerpt and post.excerpt|length > 140 %}...{% endif %}</p>
+    <div class="card-footer">
+      <a href="{{ url_for('blog.article', slug=post.slug) }}" class="btn-explore">Explore</a>
+      {% if post.reading_time_minutes %}
+      <span class="card-read-time">{{ post.reading_time_minutes }} min read</span>
+      {% endif %}
+    </div>
+  </div>
+</article>
