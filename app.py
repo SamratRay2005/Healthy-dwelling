@@ -49,5 +49,8 @@ def create_app() -> Flask:
     return app
 
 
+app = create_app()
+
 if __name__ == "__main__":
-    create_app().run(debug=DEBUG, host=APP_HOST, port=APP_PORT)
+    # This only runs when you execute 'python app.py' locally
+    app.run(debug=DEBUG, host=APP_HOST, port=APP_PORT)
