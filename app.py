@@ -16,6 +16,13 @@ def create_app() -> Flask:
     app = Flask(__name__)
     app.secret_key = SECRET_KEY
 
+    app.config.update(
+        SESSION_COOKIE_DOMAIN=None,       # Allows the cookie to work on any domain (like your Worker)
+        SESSION_COOKIE_SAMESITE='Lax',    # Required for cross-site cookie handling
+        SESSION_COOKIE_SECURE=True,       # Ensures cookies are only sent over HTTPS
+        REMOTE_ADDR_HEADERS=['X-Forwarded-For'] # Helps Flask recognize the real user IP through the proxy
+    )
+
     # ── Jinja globals & filters ───────────────────────────────────────────────
     @app.template_filter("markdown")
     def markdown_filter(text: str) -> str:
@@ -53,8 +60,8 @@ def create_app() -> Flask:
 
     @login_manager.user_loader
     def load_user(user_id):
-        # Use the connection already opened in 'before_request'
         if 'db' not in g:
+            from adapters import get_adapter
             g.db = get_adapter()
             g.db.connect()
         return g.db.get_user_by_id(int(user_id))
