@@ -3,8 +3,7 @@
 from __future__ import annotations
 
 from sqlalchemy.orm import Session, sessionmaker
-
-from adapters.repositories import ArticleRepository, TaxonomyRepository
+from adapters.repositories import ArticleRepository, TaxonomyRepository, UserRepository, ForumRepository
 
 
 class SqlAlchemyUnitOfWork:
@@ -30,6 +29,16 @@ class SqlAlchemyUnitOfWork:
         if self.session is None:
             raise RuntimeError("UnitOfWork session not started")
         self.session.commit()
+
+    @property
+    def users(self) -> UserRepository:
+        if self.session is None: raise RuntimeError("Session not started")
+        return UserRepository(self.session)
+
+    @property
+    def forum(self) -> ForumRepository:
+        if self.session is None: raise RuntimeError("Session not started")
+        return ForumRepository(self.session)
 
     @property
     def articles(self) -> ArticleRepository:

@@ -131,12 +131,16 @@ class PostgreSQLAdapter(BaseAdapter):
         return uow.session.execute(select(User).where(User.username == username)).scalar_one_or_none()
 
     def create_user(self, **kwargs):
-        from adapters.orm_models import User
         uow = self._require_uow()
-        user = User(**kwargs)
-        uow.session.add(user)
-        uow.commit()
-        return user
+        try:
+            # Use the repository if you added it to UOW in step 2
+            user = uow.users.create(**kwargs)
+            uow.commit() # This must be called to persist to Postgres
+            return user
+        except Exception as e:
+            uow.session.rollback()
+            print(f"Database Error: {e}") # Check your terminal/logs for this!
+            raise e
 
     def get_all_topics(self):
         from adapters.orm_models import ForumTopic

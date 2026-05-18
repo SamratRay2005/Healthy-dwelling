@@ -2,17 +2,31 @@
 {% block title %}{{ mode|capitalize }} — Healthy dwelling{% endblock %}
 
 {% block content %}
-<div class="layout-wrapper" style="display: flex; justify-content: center;">
+<div class="layout-wrapper" style="display: flex; flex-direction: column; align-items: center; margin-top: 2rem;">
+  
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <div class="flash-container" style="width: 100%; max-width: 400px; margin-bottom: 1rem;">
+        {% for message in messages %}
+          <div class="alert" style="padding: 1rem; background: var(--gold-dim); border: 1px solid var(--gold); color: white; margin-bottom: 0.5rem; border-radius: 4px;">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
   <div class="sidebar-widget" style="max-width: 400px; width: 100%;">
     <h2 class="widget-title">{{ 'Join the Circle' if mode == 'register' else 'Welcome Back' }}</h2>
     
-    <form method="POST" class="subscribe-form">
+    <form method="POST" action="{{ url_for(request.endpoint) }}" class="subscribe-form">
       {% if mode == 'register' %}
-      <input type="text" name="username" placeholder="Username" class="subscribe-input" required>
-      <input type="email" name="email" placeholder="Email Address" class="subscribe-input" required>
+        <input type="text" name="username" placeholder="Username" class="subscribe-input" required>
+        <input type="email" name="email" placeholder="Email Address" class="subscribe-input" required>
       {% else %}
-      <input type="text" name="username" placeholder="Username" class="subscribe-input" required>
+        <input type="text" name="username" placeholder="Username" class="subscribe-input" required>
       {% endif %}
+      
       <input type="password" name="password" placeholder="Password" class="subscribe-input" required>
       
       <button type="submit" class="subscribe-btn">
@@ -22,9 +36,9 @@
     
     <div style="margin-top: 1rem; text-align: center; font-size: 0.8rem;">
       {% if mode == 'login' %}
-      <a href="{{ url_for('auth.register') }}" class="nav-link">Need an account? Register here</a>
+        <a href="{{ url_for('auth.register') }}" class="nav-link">Need an account? Register here</a>
       {% else %}
-      <a href="{{ url_for('auth.login') }}" class="nav-link">Already have an account? Login here</a>
+        <a href="{{ url_for('auth.login') }}" class="nav-link">Already have an account? Login here</a>
       {% endif %}
     </div>
   </div>
