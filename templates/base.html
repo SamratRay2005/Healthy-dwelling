@@ -36,11 +36,22 @@
       <span class="nav-sep">|</span>
       <a href="{{ url_for('blog.blog') }}" class="nav-link {% if request.endpoint == 'blog.blog' %}active{% endif %}">Blog</a>
       <span class="nav-sep">|</span>
+      <a href="{{ url_for('forum.index') }}" class="nav-link {% if request.endpoint.startswith('forum.') %}active{% endif %}">Forum</a>
+      <span class="nav-sep">|</span>
       <a href="{{ url_for('blog.categories') }}" class="nav-link {% if request.endpoint in ['blog.categories', 'blog.category'] %}active{% endif %}">Categories</a>
-      <!-- <span class="nav-sep">|</span> -->
-      <!-- <a href="#" class="nav-link">Resources</a> -->
-      <!-- <span class="nav-sep">|</span> -->
-      <!-- <a href="#" class="nav-link">About</a> -->
+      <span class="nav-sep">|</span>
+      
+      {% if current_user.is_authenticated %}
+        <div class="user-menu">
+          <a href="#" class="nav-link">{{ current_user.username }}</a>
+          <div class="user-dropdown">
+            <a href="{{ url_for('auth.logout') }}">Logout</a>
+          </div>
+        </div>
+      {% else %}
+        <a href="{{ url_for('auth.login') }}" class="nav-link">Login</a>
+      {% endif %}
+
       <span class="nav-sep">|</span>
       <a href="{{ url_for('blog.search') }}" class="nav-link nav-search-link {% if request.endpoint == 'blog.search' %}active{% endif %}">
         Search

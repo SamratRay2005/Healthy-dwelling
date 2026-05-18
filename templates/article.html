@@ -70,6 +70,16 @@
       {% endif %}
     </div>
 
+    <div class="sidebar-widget" style="margin-top: 3rem; text-align: center;">
+      <h4 class="widget-title">Community Insight</h4>
+      <p style="font-size: 0.9rem; margin-bottom: 1.5rem; color: var(--text-secondary);">
+      Have thoughts on this piece? Join the discussion in our forum.
+      </p>
+      <a href="{{ url_for('forum.create_topic', article_id=post.id) }}" class="btn-primary">
+        Start a Discussion
+      </a>
+    </div>
+
     <!-- Related Articles -->
     {% if post.related_articles %}
     <div class="related-section">

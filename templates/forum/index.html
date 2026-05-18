@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Community Forum — Healthy dwelling{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <span class="page-eyebrow">Community</span>
+    <h1 class="page-title">The Forum</h1>
+    <p class="page-description">Shared inquiries into consciousness, psychology, and the art of being.</p>
+    <a href="{{ url_for('forum.create_topic') }}" class="btn-primary" style="margin-top: 1.5rem;">Start a New Thread</a>
+  </div>
+</div>
+
+<div class="layout-wrapper">
+  <div class="content-area">
+    <div class="forum-topics-list">
+      {% for topic in topics %}
+      <article class="forum-topic-card">
+        <div class="topic-meta">
+          <span class="meta-author">By {{ topic.user.username }}</span>
+          <span class="meta-sep">·</span>
+          <span class="meta-date">{{ topic.created_at | dateformat }}</span>
+          
+          {% if topic.article %}
+          <span class="meta-sep">·</span>
+          <span class="meta-ref">
+            Discussing: 
+            <a href="{{ url_for('blog.article', slug=topic.article.slug) }}" class="vlog-link">
+              {{ topic.article.title }}
+            </a>
+          </span>
+          {% endif %}
+        </div>
+
+        <h3 class="topic-title">
+          <a href="{{ url_for('forum.view_topic', slug=topic.slug) }}">{{ topic.title }}</a>
+        </h3>
+        
+        <p class="card-excerpt">{{ topic.content[:140] }}...</p>
+        
+        <div class="card-footer">
+          <span class="card-read-time">{{ topic.posts|length }} replies</span>
+          <a href="{{ url_for('forum.view_topic', slug=topic.slug) }}" class="btn-explore">Enter Thread</a>
+        </div>
+      </article>
+      {% else %}
+      <div class="empty-state-box">
+        <p>No discussions have started yet. Be the first to speak.</p>
+        <a href="{{ url_for('forum.create_topic') }}" class="btn-primary">Start a Topic</a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  {% include "_sidebar.html" %}
+</div>
+{% endblock %}

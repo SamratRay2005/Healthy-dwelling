@@ -6,8 +6,8 @@ from datetime import datetime
 from typing import Optional
 
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Table, Text, func
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
-
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, backref
+from flask_login import UserMixin
 
 class Base(DeclarativeBase):
     """Declarative base for all ORM models."""
@@ -57,6 +57,50 @@ class Tag(Base):
         "Article",
         secondary=article_tags,
         back_populates="tags",
+    )
+
+class User(Base, UserMixin):
+    __tablename__ = "users"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    username: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
+    email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    password_hash: Mapped[str] = mapped_column(String(500), nullable=False)
+    created_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    
+    topics: Mapped[list["ForumTopic"]] = relationship("ForumTopic", back_populates="user")
+    posts: Mapped[list["ForumPost"]] = relationship("ForumPost", back_populates="user")
+
+class ForumTopic(Base):
+    __tablename__ = "forum_topics"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    title: Mapped[str] = mapped_column(String(500), nullable=False)
+    slug: Mapped[str] = mapped_column(String(500), unique=True, nullable=False)
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    article_id: Mapped[Optional[int]] = mapped_column(ForeignKey("articles.id", ondelete="SET NULL"))
+    created_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    user: Mapped["User"] = relationship("User", back_populates="topics")
+    posts: Mapped[list["ForumPost"]] = relationship("ForumPost", back_populates="topic", cascade="all, delete-orphan")
+    article: Mapped[Optional["Article"]] = relationship("Article")
+
+class ForumPost(Base):
+    __tablename__ = "forum_posts"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    topic_id: Mapped[int] = mapped_column(ForeignKey("forum_topics.id", ondelete="CASCADE"), nullable=False)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    # ── Updated: Parent-Child relationship ──
+    parent_id: Mapped[Optional[int]] = mapped_column(ForeignKey("forum_posts.id", ondelete="CASCADE"), nullable=True)
+    created_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    topic: Mapped["ForumTopic"] = relationship("ForumTopic", back_populates="posts")
+    user: Mapped["User"] = relationship("User", back_populates="posts")
+    # ── Updated: Relationship to self for replies ──
+    replies: Mapped[list["ForumPost"]] = relationship(
+        "ForumPost", 
+        backref=backref("parent", remote_side=[id]), 
+        cascade="all, delete-orphan"
     )
 
 

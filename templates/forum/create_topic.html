@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}New Discussion — Healthy dwelling{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <span class="page-eyebrow">Forum</span>
+    <h1 class="page-title">Start a Discussion</h1>
+  </div>
+</div>
+
+<div class="layout-wrapper">
+  <div class="content-area">
+    <div class="sidebar-widget">
+      <form method="POST" class="subscribe-form">
+
+        <!-- Discussion Title -->
+        <label class="tags-label">Discussion Title</label>
+        <input
+          type="text"
+          name="title"
+          class="subscribe-input"
+          value="{% if article %}Regarding: {{ article.title }}{% endif %}"
+          placeholder="e.g. Exploring the concept of the Shadow Self"
+          required
+          style="text-align: left; margin-bottom: 1rem;"
+        >
+
+        <!-- Discussion Content -->
+        <label class="tags-label">Your Inquiry or Thoughts</label>
+        <textarea
+          name="content"
+          class="subscribe-input"
+          rows="10"
+          placeholder="Write your post here using Markdown..."
+          required
+          style="text-align: left; margin-bottom: 1rem;"
+        ></textarea>
+
+        <!-- Submit -->
+        <button type="submit" class="subscribe-btn">
+          Publish Thread
+        </button>
+
+      </form>
+    </div>
+  </div>
+
+  {% include "_sidebar.html" %}
+</div>
+{% endblock %}

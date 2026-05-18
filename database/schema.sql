@@ -75,3 +75,33 @@ DROP TRIGGER IF EXISTS trg_articles_updated_at ON articles;
 CREATE TRIGGER trg_articles_updated_at
     BEFORE UPDATE ON articles
     FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+
+-- ── Users ────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS users (
+    id            SERIAL PRIMARY KEY,
+    username      VARCHAR(100) UNIQUE NOT NULL,
+    email         VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(500) NOT NULL,
+    created_at    TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ── Forum Topics ─────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS forum_topics (
+    id          SERIAL PRIMARY KEY,
+    title       VARCHAR(500) NOT NULL,
+    slug        VARCHAR(500) UNIQUE NOT NULL,
+    content     TEXT NOT NULL,
+    user_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    article_id  INTEGER REFERENCES articles(id) ON DELETE SET NULL,
+    created_at  TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ── Forum Posts (Comments) ───────────────────────────────────
+CREATE TABLE IF NOT EXISTS forum_posts (
+    id          SERIAL PRIMARY KEY,
+    content     TEXT NOT NULL,
+    topic_id    INTEGER NOT NULL REFERENCES forum_topics(id) ON DELETE CASCADE,
+    user_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    created_at  TIMESTAMPTZ DEFAULT NOW()
+);

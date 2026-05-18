@@ -7,6 +7,9 @@ from flask import Flask, g
 from config import SECRET_KEY, DEBUG, APP_HOST, APP_PORT
 from adapters import get_adapter
 from routes.blog import blog_bp
+from flask_login import LoginManager
+from routes.auth import auth_bp
+from routes.forum import forum_bp
 
 
 def create_app() -> Flask:
@@ -44,7 +47,21 @@ def create_app() -> Flask:
             db.disconnect()
 
     # ── Blueprints ────────────────────────────────────────────────────────────
+    login_manager = LoginManager()
+    login_manager.login_view = "auth.login"
+    login_manager.init_app(app)
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        adapter = get_adapter()
+        adapter.connect()
+        return adapter.get_user_by_id(int(user_id))
+    
+    
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(forum_bp)
     app.register_blueprint(blog_bp)
+    
 
     return app
 

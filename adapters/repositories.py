@@ -6,6 +6,34 @@ from sqlalchemy import and_, func, or_, select, update
 from sqlalchemy.orm import Session, joinedload
 
 from adapters.orm_models import Article, Category, Tag, article_tags
+from adapters.orm_models import User, ForumTopic, ForumPost
+
+
+class UserRepository:
+    def __init__(self, session: Session): self._session = session
+    def by_id(self, user_id: int) -> User | None:
+        return self._session.get(User, user_id)
+    def by_username(self, username: str) -> User | None:
+        return self._session.execute(select(User).where(User.username == username)).scalar_one_or_none()
+    def create(self, **kwargs) -> User:
+        user = User(**kwargs)
+        self._session.add(user)
+        return user
+
+class ForumRepository:
+    def __init__(self, session: Session): self._session = session
+    def list_topics(self) -> list[ForumTopic]:
+        return list(self._session.scalars(select(ForumTopic).order_by(ForumTopic.created_at.desc())).all())
+    def topic_by_slug(self, slug: str) -> ForumTopic | None:
+        return self._session.execute(select(ForumTopic).options(joinedload(ForumTopic.user), joinedload(ForumTopic.posts)).where(ForumTopic.slug == slug)).unique().scalars().first()
+    def create_topic(self, **kwargs) -> ForumTopic:
+        topic = ForumTopic(**kwargs)
+        self._session.add(topic)
+        return topic
+    def create_post(self, **kwargs) -> ForumPost:
+        post = ForumPost(**kwargs)
+        self._session.add(post)
+        return post
 
 
 class ArticleRepository:

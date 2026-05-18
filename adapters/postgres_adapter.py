@@ -118,3 +118,71 @@ class PostgreSQLAdapter(BaseAdapter):
         uow = self._require_uow()
         uow.articles.increment_view_count(article_id)
         uow.commit()
+
+    def get_user_by_id(self, user_id):
+        from adapters.orm_models import User
+        uow = self._require_uow()
+        return uow.session.get(User, user_id)
+
+    def get_user_by_username(self, username):
+        from adapters.orm_models import User
+        from sqlalchemy import select
+        uow = self._require_uow()
+        return uow.session.execute(select(User).where(User.username == username)).scalar_one_or_none()
+
+    def create_user(self, **kwargs):
+        from adapters.orm_models import User
+        uow = self._require_uow()
+        user = User(**kwargs)
+        uow.session.add(user)
+        uow.commit()
+        return user
+
+    def get_all_topics(self):
+        from adapters.orm_models import ForumTopic
+        from sqlalchemy import select
+        from sqlalchemy.orm import joinedload # Ensure this is imported
+        uow = self._require_uow()
+        # Use joinedload so the article and user data is available in the template
+        return uow.session.scalars(
+            select(ForumTopic)
+            .options(joinedload(ForumTopic.article), joinedload(ForumTopic.user))
+            .order_by(ForumTopic.created_at.desc())
+        ).all()
+
+    def get_topic_by_slug(self, slug):
+        from adapters.orm_models import ForumTopic
+        from sqlalchemy import select
+        from sqlalchemy.orm import joinedload
+        uow = self._require_uow()
+        return uow.session.execute(
+            select(ForumTopic)
+            .options(
+                joinedload(ForumTopic.user), 
+                joinedload(ForumTopic.posts),
+                joinedload(ForumTopic.article) # Join the article
+            )
+            .where(ForumTopic.slug == slug)
+        ).unique().scalar_one_or_none()
+
+    def get_article_by_id(self, article_id: int) -> dict | None:
+        from adapters.orm_models import Article
+        uow = self._require_uow()
+        article = uow.session.get(Article, article_id)
+        return self._article_to_dict(article) if article else None
+
+    def create_topic(self, **kwargs):
+        from adapters.orm_models import ForumTopic
+        uow = self._require_uow()
+        topic = ForumTopic(**kwargs)
+        uow.session.add(topic)
+        uow.commit()
+        return topic
+
+    def create_post(self, **kwargs):
+        from adapters.orm_models import ForumPost
+        uow = self._require_uow()
+        post = ForumPost(**kwargs)
+        uow.session.add(post)
+        uow.commit()
+        return post

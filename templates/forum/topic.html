@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% block title %}{{ topic.title }}{% endblock %}
+
+{% macro render_post(post, depth=0) %}
+  <!-- Added reply-indent for nested replies based on depth -->
+  <div class="post-node {% if depth > 0 %}reply-indent{% endif %}" id="post-{{ post.id }}">
+    <div class="forum-post-card">
+      <div class="post-header">
+        <span class="post-username">{{ post.user.username }}</span>
+        <span class="meta-sep">·</span>
+        <span class="post-date">{{ post.created_at | dateformat }}</span>
+      </div>
+      
+      <div class="post-body">
+        {{ post.content }}
+      </div>
+
+      <div class="post-actions">
+        <a href="#reply-form" class="action-link" onclick="setReply('{{ post.user.username }}', '{{ post.id }}')">Reply</a>
+      </div>
+    </div>
+
+    {% if post.replies %}
+      <div class="reply-group">
+        {% for reply in post.replies %}
+          <div class="reply-wrapper {% if loop.index > 2 %}hidden-reply post-{{ post.id }}-extra{% endif %}">
+            {{ render_post(reply, depth + 1) }}
+          </div>
+        {% endfor %}
+        
+        {% if post.replies|length > 2 %}
+          <div class="show-more-wrapper">
+            <button class="show-more-btn" onclick="toggleReplies('{{ post.id }}', this)">
+              + {{ post.replies|length - 2 }} more replies
+            </button>
+          </div>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+{% endmacro %}
+
+{% block content %}
+<div class="layout-wrapper article-layout">
+  <div class="content-area">
+    
+    <div class="forum-main-topic">
+      {% if topic.article %}
+      <div class="article-category-badge" style="margin-bottom: 1rem;">
+        Discussing: <a href="{{ url_for('blog.article', slug=topic.article.slug) }}">{{ topic.article.title }}</a>
+      </div>
+      {% endif %}
+      
+      <h1 class="article-hero-title" style="font-family: var(--font-display); color: var(--gold);">{{ topic.title }}</h1>
+      
+      <div class="article-meta">
+        <span class="meta-author">By {{ topic.user.username }}</span>
+        <span class="meta-sep">·</span>
+        <span class="meta-date">{{ topic.created_at | dateformat }}</span>
+      </div>
+
+      <div class="prose" style="margin-top: 2rem;">
+        {{ topic.content | markdown | safe }}
+      </div>
+    </div>
+
+    <hr class="forum-sep">
+
+    <div class="forum-replies">
+      <h3 class="section-heading" style="margin-bottom: 2rem;">
+        <span>{{ topic.posts|length }} Observations</span>
+      </h3>
+      
+      {% for post in root_posts %}
+        {{ render_post(post) }}
+      {% endfor %}
+
+      <div class="sidebar-widget" id="reply-form" style="margin-top: 4rem; border: 1px solid var(--gold-dim);">
+        <h4 class="widget-title" id="reply-title">Add to the conversation</h4>
+        <form method="POST" class="subscribe-form">
+          <input type="hidden" name="parent_id" id="parent_id_input">
+          <textarea name="content" class="subscribe-input" rows="5" placeholder="Share your insight..." required style="text-align: left;"></textarea>
+          <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+            <button type="submit" class="subscribe-btn" style="flex: 1;">Post Reply</button>
+            <button type="button" id="cancel-reply" class="btn-ghost" style="display:none;" onclick="cancelReply()">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Restored the back navigation -->
+    <div class="back-nav" style="margin-top: 2rem;">
+      <a href="{{ url_for('forum.index') }}" class="btn-ghost">← Back to Forum</a>
+    </div>
+
+  </div>
+
+  {% include "_sidebar.html" %}
+</div>
+
+<script>
+function setReply(username, postId) {
+    document.getElementById('parent_id_input').value = postId;
+    document.getElementById('reply-title').innerHTML = `Replying to <span style="color:var(--gold)">${username}</span>`;
+    document.getElementById('cancel-reply').style.display = "block";
+    
+    // Restored textarea focus and placeholder dynamic updating 
+    const textarea = document.querySelector('textarea[name="content"]');
+    textarea.placeholder = "Write your reply to " + username + "...";
+    textarea.focus();
+
+    window.scrollTo({
+        top: document.getElementById('reply-form').offsetTop - 100,
+        behavior: 'smooth'
+    });
+}
+
+function cancelReply() {
+    document.getElementById('parent_id_input').value = "";
+    document.getElementById('reply-title').innerText = "Add to the conversation";
+    document.getElementById('cancel-reply').style.display = "none";
+    
+    // Reset placeholder
+    document.querySelector('textarea[name="content"]').placeholder = "Share your insight...";
+}
+
+function toggleReplies(postId, btn) {
+    const extras = document.querySelectorAll('.post-' + postId + '-extra');
+    extras.forEach(el => el.classList.remove('hidden-reply'));
+    btn.parentElement.remove();
+}
+</script>
+
+<!-- Restored CSS to power the depth rendering and class toggles -->
+<style>
+  .reply-indent {
+    margin-left: 2rem;
+    border-left: 2px solid var(--border-subtle, #eaeaea);
+    padding-left: 1.5rem;
+  }
+  .hidden-reply {
+    display: none;
+  }
+  @media (max-width: 768px) {
+    .reply-indent { margin-left: 1rem; padding-left: 1rem; }
+  }
+</style>
+{% endblock %}
