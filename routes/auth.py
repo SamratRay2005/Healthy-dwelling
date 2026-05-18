@@ -11,6 +11,11 @@ def register():
         email = request.form.get('email')
         password = request.form.get('password')
         
+        # Add validation to prevent NoneType errors
+        if not username or not email or not password:
+            flash('All fields are required.')
+            return redirect(url_for('auth.register'))
+        
         # Check if user exists via your adapter
         existing_user = g.db.get_user_by_username(username)
         if existing_user:
@@ -29,6 +34,10 @@ def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
+        
+        if not username or not password:
+            flash('Username and password are required.')
+            return render_template('auth/login.html', mode='login')
         
         user = g.db.get_user_by_username(username)
         if user and check_password_hash(user.password_hash, password):
