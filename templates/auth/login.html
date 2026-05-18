@@ -19,7 +19,7 @@
   <div class="sidebar-widget" style="max-width: 400px; width: 100%;">
     <h2 class="widget-title">{{ 'Join the Circle' if mode == 'register' else 'Welcome Back' }}</h2>
     
-    <form method="POST" action="{{ url_for(request.endpoint) }}" class="subscribe-form">
+    <form method="POST" action="" class="subscribe-form">
       {% if mode == 'register' %}
         <input type="text" name="username" placeholder="Username" class="subscribe-input" required>
         <input type="email" name="email" placeholder="Email Address" class="subscribe-input" required>

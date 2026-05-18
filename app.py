@@ -53,11 +53,13 @@ def create_app() -> Flask:
 
     @login_manager.user_loader
     def load_user(user_id):
-        adapter = get_adapter()
-        adapter.connect()
-        return adapter.get_user_by_id(int(user_id))
+        # Use the connection already opened in 'before_request'
+        if 'db' not in g:
+            g.db = get_adapter()
+            g.db.connect()
+        return g.db.get_user_by_id(int(user_id))
     
-    
+
     app.register_blueprint(auth_bp)
     app.register_blueprint(forum_bp)
     app.register_blueprint(blog_bp)
